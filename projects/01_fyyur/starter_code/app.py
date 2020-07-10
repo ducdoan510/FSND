@@ -41,7 +41,7 @@ class Venue(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: (done) implement any missing fields, as a database migration using Flask-Migrate
     genres = db.Column(db.String(120))
     website = db.Column(db.String())
     seeking_talent = db.Column(db.Boolean)
@@ -65,7 +65,7 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: (done) implement any missing fields, as a database migration using Flask-Migrate
     website = db.Column(db.String())
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String())
@@ -76,7 +76,7 @@ class Artist(db.Model):
         return {name: getattr(self, name) for name in column_names}
 
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# TODO (done) Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 class Show(db.Model):
     __tablename__ = 'show'
@@ -98,6 +98,16 @@ class Show(db.Model):
             "venue_name": self.venue.name,
             "venue_image_link": self.venue.image_link,
             "start_time": self.start_time.isoformat(),
+        }
+
+    def json(self):
+        return {
+            "venue_id": self.venue_id,
+            "venue_name": self.venue.name,
+            "artist_id": self.artist_id,
+            "artist_name": self.artist.name,
+            "artist_image_link": self.artist.image_link,
+            "start_time": self.start_time.isoformat()
         }
 
 # ----------------------------------------------------------------------------#
@@ -130,7 +140,7 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: replace with real venues data.
+    # TODO: (done) replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     venues = Venue.query.all()
     areas = {}
@@ -153,7 +163,7 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # TODO: (done) implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for Hop should return "The Musical Hop".
     # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
     search_term = request.form.get('search_term', '')
@@ -172,7 +182,7 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # TODO: (done) replace with real venue data from the venues table, using venue_id
     venue = Venue.query.get(venue_id)
     venue_shows = venue.shows
     past_shows = []
@@ -217,9 +227,17 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
+    # TODO: (done) Complete this endpoint for taking a venue_id, and using
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
+    try:
+        Venue.query.filter_by(id=int(venue_id)).delete()
+        logging.error(f'Deletion of venue {venue_id} succeeded')
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Deletion of venue {venue_id} failed')
+        logging.error(str(e))
+    finally:
+        db.session.close()
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
     return None
@@ -335,42 +353,8 @@ def shows():
     # displays list of shows at /shows
     # TODO: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data = [{
-        "venue_id": 1,
-        "venue_name": "The Musical Hop",
-        "artist_id": 4,
-        "artist_name": "Guns N Petals",
-        "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-        "start_time": "2019-05-21T21:30:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 5,
-        "artist_name": "Matt Quevedo",
-        "artist_image_link": "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80",
-        "start_time": "2019-06-15T23:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-01T20:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-08T20:00:00.000Z"
-    }, {
-        "venue_id": 3,
-        "venue_name": "Park Square Live Music & Coffee",
-        "artist_id": 6,
-        "artist_name": "The Wild Sax Band",
-        "artist_image_link": "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80",
-        "start_time": "2035-04-15T20:00:00.000Z"
-    }]
+    shows = Show.query.all()
+    data = [show.json() for show in shows]
     return render_template('pages/shows.html', shows=data)
 
 
