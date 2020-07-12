@@ -295,6 +295,7 @@ def show_artist(artist_id):
     artist_json['upcoming_shows_count'] = len(upcoming_shows)
     artist_json['past_shows'] = [show.json_venue() for show in past_shows]
     artist_json['upcoming_shows'] = [show.json_venue() for show in upcoming_shows]
+    artist_json['genres'] = artist.genres.split(',')
 
     return render_template('pages/show_artist.html', artist=artist_json)
 
@@ -345,10 +346,18 @@ def create_artist_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    try:
+        artist = Artist(**request.form)
+        artist.seeking_venue = bool(request.form.get('seeking_venue', None))
+        artist.genres = ''.join(request.form.getlist('genres'))
+        db.session.add(artist)
+        db.session.commit()
+        # on successful db insert, flash success
+        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+    except Exception as e:
+        # TODO: on unsuccessful db insert, flash an error instead.
+        logging.error(str(e))
+        flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
     return render_template('pages/home.html')
 
 
