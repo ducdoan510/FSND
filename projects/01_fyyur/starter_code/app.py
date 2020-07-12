@@ -214,14 +214,21 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
-
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    try:
+        # TODO: (done) insert form data as a new Venue record in the db, instead
+        new_venue = Venue(**request.form)
+        new_venue.genres = ','.join(request.form.getlist('genres'))
+        new_venue.seeking_talent = bool(request.form.get('seeking_talent', None))
+        # TODO: (done) modify data to be the data object returned from db insertion
+        db.session.add(new_venue)
+        db.session.commit()
+        # on successful db insert, flash success
+        flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    except Exception as e:
+        # TODO: (done) on unsuccessful db insert, flash an error instead.
+        logging.error(str(e))
+        flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+        # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
 
@@ -351,7 +358,7 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
     # displays list of shows at /shows
-    # TODO: replace with real venues data.
+    # TODO: (done) replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     shows = Show.query.all()
     data = [show.json() for show in shows]
