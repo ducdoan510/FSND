@@ -254,14 +254,14 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
+    # TODO: (done) replace with real data returned from querying the database
     data = Artist.query.all()
     return render_template('pages/artists.html', artists=data)
 
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # TODO: (done) implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
     search_term = request.form.get('search_term', '')
@@ -280,7 +280,7 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
+    # TODO: (done) replace with real venue data from the venues table, using venue_id
     artist = Artist.query.get(artist_id)
     artist_json = artist.json()
     shows = artist.shows
@@ -288,9 +288,9 @@ def show_artist(artist_id):
     upcoming_shows = []
     for show in shows:
         if show.start_time <= datetime.now():
-            upcoming_shows.append(show)
-        else:
             past_shows.append(show)
+        else:
+            upcoming_shows.append(show)
     artist_json['past_shows_count'] = len(past_shows)
     artist_json['upcoming_shows_count'] = len(upcoming_shows)
     artist_json['past_shows'] = [show.json_venue() for show in past_shows]
@@ -343,8 +343,8 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    # TODO: (done) insert form data as a new Venue record in the db, instead
+    # TODO: (done) modify data to be the data object returned from db insertion
 
     try:
         artist = Artist(**request.form)
@@ -355,7 +355,7 @@ def create_artist_submission():
         # on successful db insert, flash success
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
     except Exception as e:
-        # TODO: on unsuccessful db insert, flash an error instead.
+        # TODO: (done) on unsuccessful db insert, flash an error instead.
         logging.error(str(e))
         flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
     return render_template('pages/home.html')
@@ -385,13 +385,22 @@ def create_shows():
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show listing form
     # TODO: insert form data as a new Show record in the db, instead
-
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
+    try:
+        show_json = dict(request.form)
+        show_json['artist_id'] = int(show_json['artist_id'])
+        show_json['venue_id'] = int(show_json['venue_id'])
+        show_json['start_time'] = datetime.strptime(show_json['start_time'], '%Y-%m-%d %H:%M:%S')
+        show = Show(**show_json)
+        db.session.add(show)
+        db.session.commit()
+        # on successful db insert, flash success
+        flash('Show was successfully listed!')
     # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
+    except Exception as e:
+        logging.error(str(e))
+        flash('An error occurred. Show could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-    return render_template('pages/home.html')
+    return redirect(url_for('index'))
 
 
 @app.errorhandler(404)
