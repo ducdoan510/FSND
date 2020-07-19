@@ -9,6 +9,11 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 
+def paginate(objs, page, page_size=QUESTIONS_PER_PAGE):
+    start = (page - 1) * page_size
+    return objs[start: start + page_size]
+
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -17,16 +22,29 @@ def create_app(test_config=None):
     '''
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     '''
+    CORS(app)
 
     '''
     @TODO: Use the after_request decorator to set Access-Control-Allow
     '''
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
+        return response
 
     '''
     @TODO: 
     Create an endpoint to handle GET requests 
     for all available categories.
     '''
+    @app.route('/categories')
+    def get_categories():
+        categories = Category.query.all()
+        category_json = {}
+        for cat in categories:
+            category_json[cat.id] = cat.type
+        return jsonify({'categories': category_json})
 
     '''
     @TODO: 
@@ -40,6 +58,35 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions. 
     '''
+    @app.route('/questions')
+    def get_questions():
+        return get_questions_by_category(None)
+
+    @app.route('/categories/<int:category_id>/questions')
+    def get_questions_by_category(category_id):
+        page = request.args.get('page', 1, type=int)
+
+        # get filtered questions
+        current_category = Category.query.get(category_id).format() if category_id else None
+        question_filter_query = Question.query.filter_by(category=category_id) if category_id else Question.query
+        questions = question_filter_query.order_by(Question.id).all()
+        formatted_questions = [q.format() for q in questions]
+        paginated_questions = paginate(formatted_questions, page)
+        if not paginated_questions:
+            abort(404)
+
+        # build categories map
+        categories = Category.query.all()
+        category_json = {}
+        for cat in categories:
+            category_json[cat.id] = cat.type
+
+        return jsonify({
+            'questions': paginated_questions,
+            'total_questions': len(formatted_questions),
+            'categories': category_json,
+            'current_category': current_category
+        })
 
     '''
     @TODO: 
