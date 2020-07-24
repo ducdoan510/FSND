@@ -71,10 +71,6 @@ REVIEW_COMMENT
 This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
 
 Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
 
 GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
@@ -86,6 +82,39 @@ GET '/categories'
 '4' : "History",
 '5' : "Entertainment",
 '6' : "Sports"}
+
+GET '/questions'
+- Fetch paginated list of questions
+- Request Arguments: page
+- Returns: A dictionary contains all questions, the dictionary contains following keys: success, quetions, total_questions, categories, current_category
+{
+    "success": True,
+    "questions": [{"id": "1", "question": "What is it?", "answer": "A pen", "category": "1", "difficulty": 1}],
+    "total_questions": 2
+    "categories": {'1': "Sciences'}
+    "current_categories": null
+}
+
+POST '/questions'
+- Create a new question
+- Post data: must have the following keys: question, answer, category, difficulty
+
+DELETE '/questions/<question_id>'
+- Delete the question with specified id
+
+POST '/questions'
+- Search quetions by search term
+- Post data: must have the key: searchTerm
+- Returns: A list of questions of same format as GET '/questions' where any question has the searchTerm in its question
+
+POST '/quizzes'
+- Get a question for the next quiz
+- Post data: must have the following keys: previous questions, quiz_category
+- Returns: A question that did not appear in previous questions and belong to quiz category
+{
+    "quetions": {"id": "1", "question": "What is it?", "answer": "A pen", "category": "1", "difficulty": 1}
+}
+
 
 ```
 
