@@ -66,11 +66,9 @@ One note before you delve into your tasks: for each endpoint you are expected to
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
 
-Endpoints
+
+## Endpoints
 
 GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
@@ -98,6 +96,15 @@ GET '/questions'
 POST '/questions'
 - Create a new question
 - Post data: must have the following keys: question, answer, category, difficulty
+- Returns: A list of questions including the newly created questions. The format is same as as json returned by GET /questions
+{
+    "success": True,
+    "questions": [{"id": "1", "question": "What is it?", "answer": "A pen", "category": "1", "difficulty": 1}],
+    "total_questions": 2
+    "categories": {'1': "Sciences'}
+    "current_categories": null
+}
+
 
 DELETE '/questions/<question_id>'
 - Delete the question with specified id
@@ -106,6 +113,25 @@ POST '/questions'
 - Search quetions by search term
 - Post data: must have the key: searchTerm
 - Returns: A list of questions of same format as GET '/questions' where any question has the searchTerm in its question
+{
+    "success": True,
+    "questions": [{"id": "1", "question": "What is it?", "answer": "A pen", "category": "1", "difficulty": 1}],
+    "total_questions": 2
+    "categories": {'1': "Sciences'}
+    "current_categories": null
+}
+
+GET '/categories/<category_id>/questions'
+- Get all questions that belong to a certain category (specified by category_id in the request URL)
+- Parameters: page
+- Returns: A list of questions that belong to a specified category. The format is same as result of GET '/questions'
+{
+    "success": True,
+    "questions": [{"id": "1", "question": "What is it?", "answer": "A pen", "category": "1", "difficulty": 1}],
+    "total_questions": 2
+    "categories": {'1': "Sciences'}
+    "current_categories": null
+}
 
 POST '/quizzes'
 - Get a question for the next quiz
@@ -116,7 +142,35 @@ POST '/quizzes'
 }
 
 
-```
+## Error code
+This project will return the following HTTP Errors
+
+404: Not found
+- When page does not exist (e.g. paginated page of questions that is more than the number of actual questions)
+- Returns: 
+{
+    "success": false,
+    "error": 404,
+    "message": "Not found"
+}
+
+400: Bad Request
+- When user request is invalid or wrongly formatted
+- Returns:
+{
+    "success": false,
+    "error": 422,
+    "message": "Not found"
+}
+
+422: Unprocessable request
+- When user request is syntactically valid but the server cannot process with the request
+- Returns:
+{
+    "success": False,
+    "error": 422,
+    "message": 'Unprocessable request'
+}
 
 
 ## Testing
